@@ -74,7 +74,16 @@ app.get("/", (req, res) => {
       method: "POST",
       description: "Creates a new thought",
       body:{ message: "Your happy thought (5-140 characters)" }
-
+    },
+    {
+      path: "/thoughts:/id/like",
+      method: "PATCH",
+      description: "Likes a thought message" 
+    },
+    {
+      path: "/thoughts/:id",
+      method: "DELETE",
+      description: "Deletes a thought by ID"
     }
     ]
   })
