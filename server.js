@@ -1,3 +1,5 @@
+import dotenv from "dotenv"
+dotenv.config()
 import cors from "cors";
 import express from "express";
 import thoughtsData from "./data.json" with { type: "json" };
@@ -29,30 +31,18 @@ const ThoughtSchema = new mongoose.Schema ({
 })
 const Thought = mongoose.model("Thought", ThoughtSchema)
 
-let thoughts = thoughtsData
 
-// Defines the port the app will run on. Defaults to 8080, but can be overridden
-// when starting the server. Example command to overwrite PORT env variable value:
-// PORT=9000 npm start
+// Defines the port the app will run on. 
 const port = process.env.PORT || 8080
 const app = express()
 
-// Add middlewares to enable cors and json body parsing
+// Middlewares to enable cors and json body parsing
 app.use(cors())
 app.use(express.json())
 
-//ex from class 
-// const Animal =mongoose.model('Animal', {
-//   name: string,
-//   age: number,
-//   isFurry: Boolean
-// })
+//routes
 
-// new Animal ({ name:'Alfons', age: 2, isFurry: true }).save()
-// new Animal ({ name:'Pelle', age: 6, isFurry: false }).save()
-
-// Start defining your routes here
-
+// documentation endpoints 
 app.get("/", (req, res) => {
   
   res.json ({
@@ -73,10 +63,10 @@ app.get("/", (req, res) => {
       path: "/thoughts",
       method: "POST",
       description: "Creates a new thought",
-      body:{ message: "Your happy thought (5-140 characters)" }
+      body: { message: "Your happy thought (5-140 characters)" }
     },
     {
-      path: "/thoughts:/id/like",
+      path: "/thoughts/:id/like",
       method: "PATCH",
       description: "Likes a thought message" 
     },
@@ -89,6 +79,7 @@ app.get("/", (req, res) => {
   })
 }); 
 
+// route get all thoughts (with sorting option)
 app.get("/thoughts", async (req, res) => {
   try{
   const { sort } = req.query
@@ -107,6 +98,7 @@ app.get("/thoughts", async (req, res) => {
 }
 });
 
+// route to get a thought by ID
 app.get("/thoughts/:id", async (req,res) => {
   try {
   const { id } = req.params
@@ -143,7 +135,7 @@ app.post("/thoughts", async (req, res) => {
   }
 });
 
-// route to delete thoughts
+// route to delete thoughts by ID
 app.delete("/thoughts/:id", async (req, res) =>{ 
   try {
     const { id } = req.params
