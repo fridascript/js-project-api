@@ -130,8 +130,16 @@ app.get("/", (req, res) => {
       {
         path: "/thoughts",
         method: "POST",
-        description: "Creates a new thought",
+        description: "Creates a new thought (req authentication)",
+        headers: { Authorization: "accessToken"},
         body: { message: "Your happy thought (5-140 characters)" }
+      },
+      {
+        path: "/thoughts/:id",
+        method: "PATCH",
+        description: "Updates a thought message (req authentication)",
+        headers: { Authorization: "accessToken" },
+        body: { message: "Updated thought (5-140 characters)" }
       },
       {
         path: "/thoughts/:id/like",
@@ -141,7 +149,8 @@ app.get("/", (req, res) => {
       {
         path: "/thoughts/:id",
         method: "DELETE",
-        description: "Deletes a thought by ID"
+        description: "Deletes a thought by ID (req authentication)",
+        headers: { Authorization: "accessToken" }
       }
     ]
   });
@@ -342,6 +351,58 @@ app.delete("/thoughts/:id", authenticateUser, async (req, res) => {
       success: false,
       response: null,
       message: "Could not delete thought"
+    });
+  }
+});
+
+// route to update a thought message (authenticated)
+app.patch("/thoughts/:id", authenticateUser, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { message } = req.body;
+    
+    // validate ID format before querying database
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        response: null,
+        message: "Invalid ID format"
+      });
+    }
+    
+    // validate message length
+    if (!message || message.length < 5 || message.length > 140) {
+      return res.status(400).json({
+        success: false,
+        response: null,
+        message: "Message must be between 5 and 140 characters"
+      });
+    }
+    
+    const updatedThought = await Thought.findByIdAndUpdate(
+      id,
+      { message },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedThought) {
+      return res.status(404).json({
+        success: false,
+        response: null,
+        message: "Thought not found"
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      response: updatedThought,
+      message: "Thought updated successfully"
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      response: null,
+      message: "Could not update thought"
     });
   }
 });
