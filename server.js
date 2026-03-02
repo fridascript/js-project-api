@@ -83,8 +83,7 @@ const ThoughtSchema = new mongoose.Schema({
   },
   user: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    required: true
+    ref: "User"
   }
 });
 
@@ -173,7 +172,7 @@ app.get("/thoughts", async (req, res) => {
       query = query.sort({ createdAt: -1 });
     }
 
-    const thoughts = await query.limit(20);
+    const thoughts = await query.populate("user", "name").limit(20);
     
     return res.status(200).json({
       success: true,
