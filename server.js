@@ -80,6 +80,11 @@ const ThoughtSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now
+  },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true
   }
 });
 
@@ -205,6 +210,7 @@ app.post("/users", async (req, res) => {
       accessToken: user.accessToken
     });
   } catch (err) {
+    console.log ("signup error:", err);
     res.status(400).json({
       message: "could not create user",
       errors: err.errors
@@ -292,23 +298,17 @@ app.post("/thoughts", authenticateUser, async (req, res) => {
   try {
     const { message } = req.body;
 
-    const newThought = await Thought.create({ message });
-    
+    const newThought = await Thought.create({
+      message,
+      user: req.user._id
+    });
+
     return res.status(201).json({
       success: true,
       response: newThought,
       message: "Thought created successfully"
     });
   } catch (error) {
-    if (error.name === "ValidationError") {
-      return res.status(400).json({
-        success: false,
-        response: null,
-        message: "Validation failed",
-        details: error.message
-      });
-    }
-    
     return res.status(500).json({
       success: false,
       response: null,
